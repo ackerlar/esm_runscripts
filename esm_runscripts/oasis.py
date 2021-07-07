@@ -78,11 +78,17 @@ class oasis:
 
         # if a transformation method for CONSERV (e.g. GLOBAL) is set below,
         # increase seq (=number of lines describing the transformation) by 1
+        # DB: THAT SHOUDL NOT BE THE CASE. seq should be the sequence in the coupling order,
+        # as used in some oasis versions. I change the var to nb_of-trafo_lines instead.
+        
         seq = int(direction.get("seq", "2"))
-        if transformation.get("postprocessing", {}).get("conserv", {}).get("method"):
-            seq += 1
+        
+        nb_of_trafo_lines = 2
 
-        self.namcouple += [right + " " + left + " " + str(nb) + " " + str(time_step) + " " + str(seq) + " " + str(restart_file) + " " + export_mode]
+        if transformation.get("postprocessing", {}).get("conserv", {}).get("method"):
+            nb_of_trafo_lines += 1
+
+        self.namcouple += [right + " " + left + " " + str(nb) + " " + str(time_step) + " " + str(nb_of_trafo_lines) + " " + str(restart_file) + " " + export_mode]
         if lgrid and rgrid:
             self.namcouple += [str(rgrid["nx"]) + " " + str(rgrid["ny"]) + " " + str(lgrid["nx"]) + " " + str(lgrid["ny"]) + " " + rgrid["name"] + " " + lgrid["name"] + " LAG=" + str(lag)]
 
