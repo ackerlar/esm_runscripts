@@ -114,7 +114,6 @@ class Namelist:
         mconfig : dict
             The modified configuration.
         """
-        
         namelist_changes = mconfig.get("namelist_changes", {})
         namelist_removes = []
         for namelist in list(namelist_changes):
@@ -310,6 +309,11 @@ class Namelist:
     @staticmethod
     def apply_echam_lgfw(config):
         """
+        Applies a disturbance to the DYNCTL chapter of the echam namelist via the enstdif
+
+        Relevant configuration entries:
+        * disturbance_years (list of int): Which year to apply the disturbance
+        * distrubance (float): Value to apply. Default can be found in echam.yaml
         """
         if "echam" in config["general"]["valid_model_names"]:
             # Get the echam namelist:
@@ -320,25 +324,28 @@ class Namelist:
             if config["general"]["iterative_coupling"] and config["general"]["first_run_in_chunk"]:
                 submodelctl["lgfw"] = True 
             else:
-                submodelctl["lgfw"] = False
-            nml["submodelctl"] = submodelctl
-        return config
-
-    @staticmethod
-    def apply_jsbach_lgfw(config):
-        """
-        """
-        if "jsbach" in config["general"]["valid_model_names"]:
-            # Get the echam namelist:
-            nml = config["jsbach"]["namelists"]["namelist.jsbach"]
-            # Get the current dynctl chapter or make a new empty one:
-            hydrology_ctl = nml.get("hydrology_ctl", f90nml.namelist.Namelist())
-            # Determine which years the user wants to have disturbed:
-            if config["general"]["iterative_coupling"] and config["general"]["first_run_in_chunk"]:
-                hydrology_ctl["lgfw"] = True 
+                break
+            disturbance_years = disturbance_file or config["echam"].get(
+                "disturbance_years", []
+            )
+            current_year = config["general"]["current_date"].year
+            if current_year in disturbance_years:
+                print("-------------------------------------------------------")
+                print("")
+                print("              > Applying disturbance in echam namelist!")
+                print("")
+                print("-------------------------------------------------------")
+                dynctl["enstdif"] = config["echam"].get("disturbance", 1.000001)
+                nml["dynctl"] = dynctl
             else:
-                hydrology_ctl["lgfw"] = False
-            nml["hydrology_ctl"] = hydrology_ctl
+                if config["general"]["verbose"]:
+                    print("Not applying disturbance in echam namelist.")
+                    print(
+                        "Current year",
+                        current_year,
+                        "disturbance_years",
+                        disturbance_years,
+                    )
         return config
 
 class namelist(Namelist):

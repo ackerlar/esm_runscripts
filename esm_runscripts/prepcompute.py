@@ -207,9 +207,9 @@ def copy_files_to_thisrun(config):
         six.print_("- You will be informed about missing files")
 
     counter = 0
-    count_max = 30
+    count_max = 150
     if config["general"]["iterative_coupling"]:
-        if 'files_to_wait_for' in config["general"]:
+        if 'files_to_wait_for' in config["general"] and config["general"]["chunk_number"] > 1:
             for file in config['general'].get('files_to_wait_for'):
                 while counter < count_max:
                     counter = counter + 1

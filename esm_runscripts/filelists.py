@@ -468,9 +468,6 @@ def replace_year_placeholder(config):
                                         filetype + "_targets"
                                     ][file_category].replace("@YEAR@", str(year))
                                     
-                                    print("all_years = ", all_years) 
-                                    print("file_category = ", file_category)
-                                    print("config[model] = ", config[model][filetype + "_sources"][file_category])
                                     new_source_name = config[model][
                                         filetype + "_sources"
                                     ][file_category].replace("@YEAR@", str(year))
@@ -515,7 +512,7 @@ def log_used_files(config):
                 if filetype + "_sources" in config[model]:
                     flist.write("\n" + filetype.upper() + ":\n")
                     for category in config[model][filetype + "_sources"]:
-#                        esm_parser.pprint_config(config[model]) 
+#                        esm_parser.pprint_config(config[model])
                         flist.write(
                             "\nSource: "
                             + config[model][filetype + "_sources"][category]
