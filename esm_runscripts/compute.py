@@ -173,6 +173,8 @@ def modify_namelists(config):
         config[model] = Namelist.nmls_remove(config[model])
         if model == "echam":
             config = Namelist.apply_echam_disturbance(config)
+        if model == "fesom":
+            config = Namelist.apply_iceberg_calving(config)
         config[model] = Namelist.nmls_modify(config[model])
         config[model] = Namelist.nmls_finalize(
             config[model], config["general"]["verbose"]
@@ -190,6 +192,19 @@ def copy_files_to_thisrun(config):
         six.print_("\n" "- File lists populated, proceeding with copy...")
         six.print_("- Note that you can see your file lists in the config folder")
         six.print_("- You will be informed about missing files")
+
+    if "fesom" in config["general"]["valid_model_names"]: 
+        if config["fesom"].get("use_icebergs", False) and config["fesom"].get("use_icesheet_coupling", False):
+            if config["general"].get("run_number", 0) == 1:
+                if not os.path.isfile(
+                    config["fesom"]["experiment_couple_dir"] + "/num_non_melted_icb_file"
+                ):
+                    with open(config["fesom"]["experiment_couple_dir"] + "/num_non_melted_icb_file", "w") as f:
+                        f.write("0")
+            else:
+                num_lines = sum(1 for line in open(os.path.join(config["fesom"]["experiment_restart_in_dir"], "iceberg.restart.ISM")))
+                with open(config["fesom"]["experiment_couple_dir"] + "/num_non_melted_icb_file", "w") as f:
+                    f.write(str(num_lines))
 
     log_used_files(config)
 
